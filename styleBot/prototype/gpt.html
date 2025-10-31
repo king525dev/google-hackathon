@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>StyleBot - Virtual Try-On</title>
+     <script src="https://kit.fontawesome.com/725fb09d99.js" crossorigin="anonymous"></script>
+     <style>
+          * {
+               box-sizing: border-box;
+               margin: 0;
+               padding: 0;
+               font-family: 'Inter', sans-serif;
+          }
+
+          body {
+               background-color: #fafafa;
+               color: #333;
+               display: flex;
+               flex-direction: column;
+               height: 100vh;
+          }
+
+          nav {
+               display: flex;
+               justify-content: space-between;
+               align-items: center;
+               padding: 1rem 2rem;
+               background-color: #fff;
+               box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          }
+
+          nav .logo {
+               display: flex;
+               align-items: center;
+               gap: 10px;
+          }
+
+          nav img {
+               width: 32px;
+               height: 32px;
+          }
+
+          nav .nav-links {
+               display: flex;
+               align-items: center;
+               gap: 2rem;
+          }
+
+          nav a {
+               text-decoration: none;
+               color: #444;
+               font-weight: 500;
+          }
+
+          header {
+               display: flex;
+               justify-content: space-between;
+               align-items: center;
+               padding: 2rem;
+               background-color: #fff;
+               border-bottom: 1px solid #ddd;
+          }
+
+          header h2 {
+               font-size: 1.8rem;
+               color: #222;
+          }
+
+          header p {
+               color: #555;
+               font-size: 0.95rem;
+          }
+
+          header button {
+               background-color: #5b3dee;
+               color: #fff;
+               border: none;
+               padding: 0.8rem 1.2rem;
+               border-radius: 8px;
+               cursor: pointer;
+               font-size: 0.9rem;
+               font-weight: 600;
+          }
+
+          main {
+               display: flex;
+               flex: 1;
+               overflow: hidden;
+          }
+
+          /* Left: Try-on workspace */
+          .workspace {
+               flex: 3;
+               display: flex;
+               flex-direction: column;
+               background-color: #fff;
+               margin: 1rem;
+               border-radius: 12px;
+               padding: 1rem 2rem;
+               box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          }
+
+          .image-upload-buttons {
+               display: flex;
+               justify-content: space-between;
+               align-items: center;
+               margin-bottom: 1rem;
+          }
+
+          .image-upload-buttons div:first-child button {
+               background: none;
+               border: 1px solid #ccc;
+               border-radius: 6px;
+               padding: 0.5rem 1rem;
+               margin-right: 0.5rem;
+               cursor: pointer;
+               font-weight: 500;
+          }
+
+          .image-upload-buttons div:last-child {
+               display: flex;
+               align-items: center;
+               gap: 0.8rem;
+          }
+
+          .image {
+               display: flex;
+               flex: 1;
+               justify-content: space-between;
+               align-items: center;
+               gap: 1rem;
+          }
+
+          .image .original,
+          .image .generated {
+               flex: 1;
+               height: 500px;
+               background-color: #f3f3f3;
+               border-radius: 8px;
+               background-size: cover;
+               background-position: center;
+               display: flex;
+               justify-content: center;
+               align-items: center;
+               position: relative;
+          }
+
+          .image .generated::after {
+               content: "Generating try-on result...";
+               font-size: 1rem;
+               color: #777;
+          }
+
+          /* Right: Recommended items */
+          .sidebar {
+               flex: 1;
+               margin: 1rem 1rem 1rem 0;
+               background-color: #fff;
+               border-radius: 12px;
+               box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+               padding: 1.5rem;
+               overflow-y: auto;
+          }
+
+          .sidebar h3 {
+               margin-bottom: 1rem;
+          }
+
+          .filter-tabs {
+               display: flex;
+               gap: 1rem;
+               margin-bottom: 1.5rem;
+          }
+
+          .filter-tabs button {
+               background: #eee;
+               border: none;
+               border-radius: 6px;
+               padding: 0.4rem 0.8rem;
+               cursor: pointer;
+          }
+
+          .item {
+               display: flex;
+               gap: 1rem;
+               margin-bottom: 1.5rem;
+               border-bottom: 1px solid #eee;
+               padding-bottom: 1rem;
+          }
+
+          .item img {
+               width: 70px;
+               height: 70px;
+               border-radius: 8px;
+               object-fit: cover;
+          }
+
+          .item-details {
+               flex: 1;
+          }
+
+          .item-details h4 {
+               margin-bottom: 0.3rem;
+               font-size: 1rem;
+          }
+
+          .item-details p {
+               font-size: 0.9rem;
+               color: #666;
+               margin-bottom: 0.2rem;
+          }
+
+          .match-bar {
+               width: 100%;
+               height: 6px;
+               background: #eee;
+               border-radius: 6px;
+               margin-top: 0.3rem;
+               position: relative;
+          }
+
+          .match-bar-fill {
+               height: 6px;
+               background-color: #8b5cf6;
+               border-radius: 6px;
+               position: absolute;
+               top: 0;
+               left: 0;
+          }
+
+          .tryon-btn {
+               display: flex;
+               align-items: center;
+               gap: 0.3rem;
+               margin-top: 0.5rem;
+               background: none;
+               border: none;
+               color: #5b3dee;
+               cursor: pointer;
+               font-weight: 600;
+          }
+     </style>
+</head>
+
+<body>
+
+     <nav>
+          <div class="logo">
+               <img src="/" alt="logo">
+               <p class="logo-text"><strong>StyleBot</strong></p>
+          </div>
+          <div class="nav-links">
+               <a href="#">Dashboard</a>
+               <a href="#">Try-On</a>
+               <a href="#">AI Stylist</a>
+          </div>
+     </nav>
+
+     <header>
+          <div>
+               <h2>Virtual Try-On</h2>
+               <p>See how clothes look on you with AI-powered visualization</p>
+          </div>
+          <div>
+               <button><i class="fa-solid fa-upload"></i> Upload Photo</button>
+          </div>
+     </header>
+
+     <main>
+          <section class="workspace">
+               <div class="image-upload-buttons">
+                    <div>
+                         <button>Compare</button>
+                         <button>Original</button>
+                         <button>Try-On</button>
+                    </div>
+                    <div>
+                         <i class="fa-solid fa-magnifying-glass-minus"></i>
+                         <p>100%</p>
+                         <i class="fa-solid fa-magnifying-glass-plus"></i>
+                         <i class="fa-solid fa-rotate-right"></i>
+                    </div>
+               </div>
+
+               <div class="image">
+                    <div class="original" style="background-image: url('your-photo.jpg');"></div>
+                    <div class="generated"></div>
+               </div>
+          </section>
+
+          <aside class="sidebar">
+               <h3>Recommended Items</h3>
+               <div class="filter-tabs">
+                    <button>All</button>
+                    <button>Tops</button>
+                    <button>Bottoms</button>
+                    <button>Dresses</button>
+                    <button>Outerwear</button>
+               </div>
+
+               <div class="item">
+                    <img src="https://via.placeholder.com/70" alt="">
+                    <div class="item-details">
+                         <h4>Vintage Denim Jacket</h4>
+                         <p>$89.99 • Levi’s</p>
+                         <div class="match-bar">
+                              <div class="match-bar-fill" style="width:95%"></div>
+                         </div>
+                         <button class="tryon-btn"><i class="fa-regular fa-eye"></i> Try On</button>
+                    </div>
+               </div>
+
+               <div class="item">
+                    <img src="https://via.placeholder.com/70" alt="">
+                    <div class="item-details">
+                         <h4>Floral Midi Dress</h4>
+                         <p>$198 • Reformation</p>
+                         <div class="match-bar">
+                              <div class="match-bar-fill" style="width:91%"></div>
+                         </div>
+                         <button class="tryon-btn"><i class="fa-regular fa-eye"></i> Try On</button>
+                    </div>
+               </div>
+
+          </aside>
+     </main>
+
+</body>
+
+</html>
